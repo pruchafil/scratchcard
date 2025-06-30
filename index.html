@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=auto, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+    table {
+        padding-bottom: 4dvw;
+        border: 1px solid gainsboro;
+    }
+
+    strong {
+        color: coral;
+    }
+    p {
+        color: darkblue;
+    }
+
+    strong, p {
+        margin: -1dvh;
+        margin-left: 1dvw;
+        margin-right: 1dvw;
+        text-align: center;
+    }
+
+    td strong {
+        font-size: 500%;
+    }
+
+    #win {
+        display: inline;
+        color: red;
+    }
+</style>
+
+<body>
+
+    {{ range $n := .Cards }}
+
+    <table>
+        {{ range $cr := $n.Cells }}
+
+        <tr>
+            {{ range $c := $cr }}
+            <td>
+                <strong>{{ $c.Number }}</strong>
+                <p>{{ $c.Money }}</p>
+            </td>
+            {{ end }}
+        </tr>
+        {{ end }}
+    </table>
+
+    <h2>Vaše výherní číslo: <div id="win">{{ $n.WinningNumber }}</div></h2>
+
+    {{ end }}
+
+</body>
+</html>
