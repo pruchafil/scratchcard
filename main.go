@@ -24,12 +24,26 @@ type ScratcherCards struct {
 	Cards []ScratcherCard
 }
 
+func generateUnique(m map[uint32]bool) uint32 {
+	n := uint32(0)
+	for {
+		n = rand.Uint32() % 100
+		_, ok := m[n]
+
+		if !ok {
+			break
+		}
+	}
+
+	return n
+}
+
 func generateCards(count int32, maxPrice uint32) ScratcherCards {
-	smallPricesUsed := make([]uint32, len(niceMoney))
+	smallPricesUnused := make([]uint32, len(niceMoney))
 
 	exp := uint32(1)
-	for i := int32(len(smallPricesUsed) - 1); i >= 0; i-- {
-		smallPricesUsed[i] = exp
+	for i := int32(len(smallPricesUnused) - 1); i >= 0; i-- {
+		smallPricesUnused[i] = exp
 		exp *= 2
 	}
 
@@ -37,17 +51,13 @@ func generateCards(count int32, maxPrice uint32) ScratcherCards {
 
 	priceUsed := false
 
-	for i := int32(0); i < count; i++ {
+	for i := range count {
 		winningNumber := uint32(0)
 		numsMap := map[uint32]bool{}
 
 		for len(numsMap) < 25 {
-			num := rand.Uint32() % 100
-			_, ok := numsMap[num]
-
-			if !ok {
-				numsMap[num] = true
-			}
+			n := generateUnique(numsMap)
+			numsMap[n] = true
 		}
 
 		nums := [5][5]uint32{}
@@ -72,43 +82,26 @@ func generateCards(count int32, maxPrice uint32) ScratcherCards {
 			winningNumber = nums[j][k]
 		} else {
 			containsSmallWin := false
-			for l := 0; l < len(smallPricesUsed); l++ {
-				if smallPricesUsed[l] != 0 {
+
+			for l := range smallPricesUnused {
+				if smallPricesUnused[l] != 0 {
 					containsSmallWin = true
 
 					j, k = rand.Uint32()%5, rand.Uint32()%5
 					money[j][k] = niceMoney[l]
 
-					n := uint32(0)
-
-					for {
-						n = rand.Uint32() % 100
-						_, ok := numsMap[n]
-
-						if !ok {
-							break
-						}
-					}
+					n := generateUnique(numsMap)
 
 					nums[j][k] = n
 					winningNumber = n
 
-					smallPricesUsed[l]--
+					smallPricesUnused[l]--
 					break
 				}
 			}
 
 			if !containsSmallWin {
-				n := uint32(0)
-
-				for {
-					n = rand.Uint32() % 100
-					_, ok := numsMap[n]
-
-					if !ok {
-						break
-					}
-				}
+				n := generateUnique(numsMap)
 
 				winningNumber = n
 
@@ -140,7 +133,7 @@ func errorHandler(err error) {
 }
 
 func queryHandler(s string, defaultValue string) string {
-	if "" == s {
+	if s == "" {
 		return defaultValue
 	}
 
